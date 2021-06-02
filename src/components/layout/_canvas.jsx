@@ -2,6 +2,9 @@ import { Canvas } from '@react-three/fiber'
 import { Preload } from '@react-three/drei'
 import { A11yUserPreferences } from '@react-three/a11y'
 import useStore from '@/helpers/store'
+import { Perf } from 'r3f-perf'
+
+import Dots from '../../components/canvas/Dots'
 
 const LCanvas = ({ children }) => {
   const dom = useStore((state) => state.dom)
@@ -13,11 +16,16 @@ const LCanvas = ({ children }) => {
         top: 0,
       }}
       onCreated={(state) => state.events.connect(dom.current)}
+      orthographic
+      camera={{ zoom: 20 }}
     >
+      <Perf />
       <A11yUserPreferences>
         <Preload all />
         {children}
       </A11yUserPreferences>
+      <Dots />
+      <color attach='background' args={['black']} />
     </Canvas>
   )
 }
