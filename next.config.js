@@ -82,6 +82,12 @@ if (process.env.EXPORT !== 'true') {
   }
 }
 
+const withTM = require('next-transpile-modules')([
+  'three',
+  'postprocessing',
+  'three-stdlib',
+])
+
 module.exports = plugins(
   [
     [
@@ -115,6 +121,7 @@ module.exports = plugins(
       },
     ],
     withBundleAnalyzer,
+    withTM,
   ],
   nextConfig
 )

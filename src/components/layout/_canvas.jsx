@@ -5,6 +5,7 @@ import useStore from '@/helpers/store'
 import { Perf } from 'r3f-perf'
 
 import Dots from '../../components/canvas/Dots'
+import Effects from '../canvas/post-processing/Effects'
 
 const LCanvas = ({ children }) => {
   const dom = useStore((state) => state.dom)
@@ -24,6 +25,7 @@ const LCanvas = ({ children }) => {
         <Preload all />
         {children}
       </A11yUserPreferences>
+      <Effects />
       <Dots />
       <color attach='background' args={['black']} />
     </Canvas>
