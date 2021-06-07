@@ -1,36 +1,17 @@
-import { useThree, useFrame, extend } from 'react-three-fiber'
-import { EffectComposer } from '@react-three/postprocessing'
-// import { ShaderPass } from 'three-stdlib/postprocessing/ShaderPass'
-// import { SavePass } from 'three-stdlib/postprocessing/SavePass'
-// import { CopyShader } from 'three-stdlib/shaders/CopyShader'
-// import { FXAAShader } from 'three-stdlib/shaders/FXAAShader'
-// import { RenderPass } from 'three-stdlib/postprocessing/RenderPass'
+import { useThree, useFrame, extend } from '@react-three/fiber'
+import { EffectComposer } from 'three-stdlib/postprocessing/EffectComposer'
+import { ShaderPass } from 'three-stdlib/postprocessing/ShaderPass'
+import { SavePass } from 'three-stdlib/postprocessing/SavePass'
+import { CopyShader } from 'three-stdlib/shaders/CopyShader'
+import { FXAAShader } from 'three-stdlib/shaders/FXAAShader'
+import { RenderPass } from 'three-stdlib/postprocessing/RenderPass'
 import { useEffect, useMemo, useRef } from 'react'
-import { Scene } from 'three'
 import * as THREE from 'three'
-import dynamic from 'next/dynamic'
 
-const ShaderPass = dynamic(
-  () => import('three-stdlib/postprocessing/ShaderPass'),
-  { ssr: false }
-)
-const SavePass = dynamic(() => import('three-stdlib/postprocessing/SavePass'), {
-  ssr: false,
-})
-const CopyShader = dynamic(() => import('three-stdlib/shaders/CopyShader'), {
-  ssr: false,
-})
-const FXAAShader = dynamic(() => import('three-stdlib/shaders/FXAAShader'), {
-  ssr: false,
-})
-const RenderPass = dynamic(
-  () => import('three-stdlib/postprocessing/RenderPass'),
-  {
-    ssr: false,
-  }
-)
+import rgbVertexShader from '../../../shaders/rgb/vertex.glsl'
+import rgbFragmentShader from '../../../shaders/rgb/fragment.glsl'
 
-extend({ EffectComposer, ShaderPass, CopyShader, SavePass, RenderPass })
+extend({ EffectComposer, ShaderPass, SavePass, RenderPass })
 
 // Shader that composites the r, g, b channels of 3 textures, respectively
 const triColorMix = {
@@ -40,26 +21,8 @@ const triColorMix = {
     tDiffuse3: { value: null },
   },
 
-  vertexShader: `varying vec2 vUv;
-  void main() {
-    vUv = uv;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1);
-  },
-  `,
-  fragmentShader: `
-  varying vec2 vUv;
-  uniform sampler2D tDiffuse1;
-  uniform sampler2D tDiffuse2;
-  uniform sampler2D tDiffuse3;
-
-  void main() {
-    vec4 del0 = texture2D(tDiffuse1, vUv);
-    vec4 del1 = texture2D(tDiffuse2, vUv);
-    vec4 del2 = texture2D(tDiffuse3, vUv);
-    float alpha = min(min(del0.a, del1.a),del2.a);
-    gl_FragColor = vec4(del0.r, del1,g, del2.b, alpha)
-  }
-  `,
+  vertexShader: rgbVertexShader,
+  fragmentShader: rgbFragmentShader,
 }
 
 // This is the way to create a custom effect render pass
@@ -82,8 +45,7 @@ const Effects = () => {
     return { rtA, rtB }
   }, [size])
   useEffect(
-    () => void composer.current.setSize(size.width, size.height, [size]),
-    [size]
+    () => void composer.current.setSize(size.width, size.height, [size])
   )
   useFrame(() => {
     // Swap render targets and update dependencies
@@ -112,7 +74,7 @@ const Effects = () => {
         uniforms-resolution-value-x={1 / (size.width * pixelRatio)}
         uniforms-resolution-value-y={1 / (size.height * pixelRatio)}
       />
-      <shaderPass />
+      <shaderPass attachArray='passes' args={[CopyShader]} />
     </effectComposer>
   )
 }
