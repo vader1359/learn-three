@@ -26,9 +26,6 @@ function esbuildLoader(config, options) {
 const nextConfig =
   process.env.EXPORT !== 'true'
     ? {
-        future: {
-          webpack5: true,
-        },
         webpack(config, { webpack, dev, isServer }) {
           config.plugins.push(
             new webpack.ProvidePlugin({
@@ -82,6 +79,13 @@ if (process.env.EXPORT !== 'true') {
   }
 }
 
+const withTM = require('next-transpile-modules')([
+  'three',
+  'three-stdlib',
+  'three-mesh-bvh',
+  '@react-three/drei',
+])
+
 module.exports = plugins(
   [
     [
@@ -115,6 +119,7 @@ module.exports = plugins(
       },
     ],
     withBundleAnalyzer,
+    withTM,
   ],
   nextConfig
 )
